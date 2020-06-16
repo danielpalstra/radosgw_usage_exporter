@@ -1,0 +1,30 @@
+image: python:3.7
+
+stages:
+  - deploy
+
+before_script:
+   - pip install twine wheel setuptools_scm
+   - python setup.py sdist bdist_wheel
+
+deploy_staging:
+  stage: deploy
+  variables:
+    TWINE_USERNAME: $STAGING_USERNAME
+    TWINE_PASSWORD: $STAGING_PASSWORD
+    TWINE_REPOSITORY_URL: $STAGING_REPOSITORY_URL
+  script:
+    - twine upload dist/*
+  except:
+    - tags
+
+deploy_production:
+  stage: deploy
+  variables:
+    TWINE_USERNAME: $PRODUCTION_USERNAME
+    TWINE_PASSWORD: $PRODUCTION_PASSWORD
+    TWINE_REPOSITORY_URL: $PRODUCTION_REPOSITORY_URL
+  script:
+    - twine upload dist/*
+  only:
+    - tags
