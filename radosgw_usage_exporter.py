@@ -58,10 +58,7 @@ class RADOSGWCollector(object):
 
         rgw_usage = self._request_data(query='usage', args='show-summary=False')
         rgw_bucket = self._request_data(query='bucket', args='stats=True')
-
-        # Get the user quota per bucket
-        for bucket in rgw_bucket:
-            bucket["user_quota"] = self._request_data(query='user', args=f"quota&uid={bucket['owner']}&quota-type=user")
+        rgw_users = self._request_data(query='user', args='list')
 
         # populate metrics with data
         if rgw_usage:
@@ -72,6 +69,10 @@ class RADOSGWCollector(object):
         if rgw_bucket:
             for bucket in rgw_bucket:
                 self._get_bucket_usage(bucket)
+
+        if rgw_users:
+            for user in rgw_users['keys']:
+                self._get_user_quota(user)
 
         duration = time.time() - start
         self._prometheus_metrics['scrape_duration_seconds'].add_metric(
@@ -159,23 +160,22 @@ class RADOSGWCollector(object):
                 GaugeMetricFamily('radosgw_usage_bucket_quota_size_objects',
                                   'Maximum allowed bucket size in number of objects',
                                   labels=["bucket", "owner", "zonegroup"]),
-
             'user_quota_enabled':
                 GaugeMetricFamily('radosgw_usage_user_quota_enabled',
                                   'User quota enabled for bucket',
-                                  labels=["bucket", "owner", "zonegroup"]),
+                                  labels=["user"]),
             'user_quota_max_size':
                 GaugeMetricFamily('radosgw_usage_user_quota_size',
                                   'Maximum allowed bucket size for user',
-                                  labels=["bucket", "owner", "zonegroup"]),
+                                  labels=["user"]),
             'user_quota_max_size_bytes':
                 GaugeMetricFamily('radosgw_usage_user_quota_size_bytes',
                                   'Maximum allowed bucket size in bytes for user',
-                                  labels=["bucket", "owner", "zonegroup"]),
+                                  labels=["user"]),
             'user_quota_max_objects':
                 GaugeMetricFamily('radosgw_usage_user_quota_size_objects',
                                   'Maximum allowed bucket size in number of objects',
-                                  labels=["bucket", "owner", "zonegroup"]),
+                                  labels=["user"]),
             'scrape_duration_seconds':
                 GaugeMetricFamily('radosgw_usage_scrape_duration_seconds',
                                   'Ammount of time each scrape takes',
@@ -313,23 +313,27 @@ class RADOSGWCollector(object):
                     [bucket_name, bucket_owner, bucket_zonegroup],
                         bucket['bucket_quota']['max_objects'])
 
-            if 'user_quota' in bucket:
-                self._prometheus_metrics['user_quota_enabled'].add_metric(
-                    [bucket_name, bucket_owner, bucket_zonegroup],
-                        bucket['user_quota']['enabled'])
-                self._prometheus_metrics['user_quota_max_size'].add_metric(
-                    [bucket_name, bucket_owner, bucket_zonegroup],
-                        bucket['user_quota']['max_size'])
-                self._prometheus_metrics['user_quota_max_size_bytes'].add_metric(
-                    [bucket_name, bucket_owner, bucket_zonegroup],
-                        bucket['user_quota']['max_size_kb'] * 1024)
-                self._prometheus_metrics['user_quota_max_objects'].add_metric(
-                    [bucket_name, bucket_owner, bucket_zonegroup],
-                        bucket['user_quota']['max_objects'])
-
         else:
             # Hammer junk, just skip it
             pass
+
+    def _get_user_quota(self, user):
+        """
+        Method to get the quota set on a specific user(s).
+        """
+        quota = self._request_data(query='user', args="quota&uid={0}&quota-type=user".format(user))
+
+        if DEBUG:
+            print(json.dumps(quota, indent=4, sort_keys=True))
+
+        self._prometheus_metrics['user_quota_enabled'].add_metric(
+            [user], quota['enabled'])
+        self._prometheus_metrics['user_quota_max_size'].add_metric(
+            [user], quota['max_size'])
+        self._prometheus_metrics['user_quota_max_size_bytes'].add_metric(
+            [user], quota['max_size_kb'] * 1024)
+        self._prometheus_metrics['user_quota_max_objects'].add_metric(
+            [user], quota['max_objects'])
 
 
 def parse_args():
