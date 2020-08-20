@@ -13,6 +13,7 @@ deploy_staging:
     TWINE_USERNAME: $STAGING_USERNAME
     TWINE_PASSWORD: $STAGING_PASSWORD
     TWINE_REPOSITORY_URL: $STAGING_REPOSITORY_URL
+    TWINE_CERT: /etc/ssl/certs/ca-certificates.crt
   script:
     - twine upload dist/*
   except:
@@ -24,6 +25,7 @@ deploy_production:
     TWINE_USERNAME: $PRODUCTION_USERNAME
     TWINE_PASSWORD: $PRODUCTION_PASSWORD
     TWINE_REPOSITORY_URL: $PRODUCTION_REPOSITORY_URL
+    TWINE_CERT: /etc/ssl/certs/ca-certificates.crt
   script:
     - twine upload dist/*
   only:
