@@ -58,7 +58,7 @@ class RADOSGWCollector(object):
 
         rgw_usage = self._request_data(query='usage', args='show-summary=False')
         rgw_bucket = self._request_data(query='bucket', args='stats=True')
-        rgw_users = self._request_data(query='user', args='list')
+        rgw_users = self._get_rgw_users()
 
         # populate metrics with data
         if rgw_usage:
@@ -71,7 +71,7 @@ class RADOSGWCollector(object):
                 self._get_bucket_usage(bucket)
 
         if rgw_users:
-            for user in rgw_users['keys']:
+            for user in rgw_users:
                 self._get_user_quota(user)
 
         duration = time.time() - start
@@ -316,6 +316,24 @@ class RADOSGWCollector(object):
         else:
             # Hammer junk, just skip it
             pass
+
+    def _get_rgw_users(self):
+        """
+        API request to get users.
+        """
+
+        import pudb; pudb.set_trace()
+
+        rgw_users = self._request_data(query='user', args='list')
+
+        if rgw_users and 'keys' in rgw_users:
+            return rgw_users['keys']
+        else:
+            # Compat with old Ceph versions (pre 12.2.3/13.2.9)
+            rgw_metadata_users = self._request_data(query='metadata/user', args='')
+            return rgw_metadata_users
+
+        return
 
     def _get_user_quota(self, user):
         """
