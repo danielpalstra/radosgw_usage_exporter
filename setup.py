@@ -49,6 +49,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/blemmenes/radosgw_usage_exporter",
-    use_scm_version=True,
+    version="2020.7.0",
     zip_safe=False,
 )

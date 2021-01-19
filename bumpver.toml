@@ -1,0 +1,22 @@
+[bumpver]
+current_version = "2020.7.0"
+version_pattern = "YYYY.MM.INC0"
+commit_message = "bump version {old_version} -> {new_version}"
+commit = true
+tag = true
+push = true
+
+[bumpver.file_patterns]
+"setup.py" = [
+    "{version}",
+    # "{pep440_version}",
+]
+# "README.md" = [
+#     "{version}",
+#     "{pep440_version}",
+# ]
+"bumpver.toml" = [
+    'current_version = "{version}"',
+]
+
+# https://github.com/mbarkhau/bumpver#reference
