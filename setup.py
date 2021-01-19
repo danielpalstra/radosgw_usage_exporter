@@ -4,7 +4,7 @@
 
 from setuptools import setup, find_packages
 
-with open('README.md') as readme_file:
+with open("README.md") as readme_file:
     readme = readme_file.read()
 
 requirements = [
@@ -14,35 +14,41 @@ requirements = [
     "requests-aws==0.1.8",
 ]
 
-setup_requirements = [ ]
+setup_requirements = ["setuptools_scm"]
 
-test_requirements = [ ]
+test_requirements = []
 
 setup(
     author="blemmenes",
-    python_requires='>=3.5',
+    python_requires=">=3.5",
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
-        'Intended Audience :: Developers',
-        'Natural Language :: English',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
+        "Development Status :: 2 - Beta",
+        "Intended Audience :: Developers",
+        "Natural Language :: English",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
     description="Prometheus exporter for scraping Ceph RADOSGW usage data.",
     install_requires=requirements,
     long_description=readme,
     include_package_data=True,
-    keywords='radosgw_usage_exporter',
-    name='radosgw_usage_exporter',
-    packages=find_packages(include=['radosgw_usage_exporter', 'radosgw_usage_exporter.*']),
-    entry_points={"console_scripts": ["radosgw_usage_exporter=radosgw_usage_exporter.radosgw_usage_exporter:main"],},
+    keywords="radosgw_usage_exporter",
+    name="radosgw_usage_exporter",
+    packages=find_packages(
+        include=["radosgw_usage_exporter", "radosgw_usage_exporter.*"]
+    ),
+    entry_points={
+        "console_scripts": [
+            "radosgw_usage_exporter=radosgw_usage_exporter.radosgw_usage_exporter:main"
+        ],
+    },
     setup_requires=setup_requirements,
-    test_suite='tests',
+    test_suite="tests",
     tests_require=test_requirements,
-    url='https://github.com/blemmenes/radosgw_usage_exporter',
-    version='2021.1.0',
+    url="https://github.com/blemmenes/radosgw_usage_exporter",
+    use_scm_version=True,
     zip_safe=False,
 )
